@@ -1,0 +1,95 @@
+<!DOCTYPE html> <html lang="en"> <head> <meta charset="UTF-8" /> <meta name="viewport" content="width=device-width, initial-scale=1.0" /> <title>Interactive Birthday-Themed Connections Puzzle</title> <style> body { font-family: Arial, sans-serif; padding: 20px; background: #f9f9f9; } h1 { color: #d35400; } .puzzle-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; max-width: 400px; margin-bottom: 20px; } .word-button { background-color: #f0ad4e; border: none; padding: 10px; font-size: 16px; cursor: pointer; border-radius: 5px; user-select: none; } .word-button.selected { background-color: #5cb85c; color: white; } #message { margin-top: 20px; font-weight: bold; font-size: 18px; color: #333; } #reset-btn { margin-top: 10px; padding: 8px 16px; font-size: 16px; background-color: #d9534f; color: white; border: none; border-radius: 5px; cursor: pointer; } </style> </head> <body> <h1>Interactive Birthday-Themed Connections Puzzle</h1> <p>Click to select 4 words that you think belong to the same category. When you select 4 correct words, the category will be displayed.</p> <div class="puzzle-grid" id="puzzleGrid"> <!-- Buttons will be generated here --> </div> <div id="message"></div> <button id="reset-btn">Reset Selection</button> <script> const words = [ "Tax day", "Playground", "Family", "Anniversary", "Back pain", "Holiday", "Birthday", "Swing set", "Nostalgia", "Cartoons", "Ice cream", "Party", "Gray hair", "Reunion", "Cake", "New Year’s Eve" ];
+
+const categories = {
+  "Birthday and Celebration": ["Birthday", "Cake", "Party", "Anniversary"],
+  "Childhood": ["Cartoons", "Playground", "Swing set", "Holiday"],
+  "Adulthood": ["Gray hair", "Back pain", "Nostalgia", "Tax day"],
+  "Family and Gatherings": ["Family", "Ice cream", "Reunion", "New Year’s Eve"]
+};
+
+const puzzleGrid = document.getElementById('puzzleGrid');
+const message = document.getElementById('message');
+const resetBtn = document.getElementById('reset-btn');
+
+let selectedWords = [];
+
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+function createButtons() {
+  const shuffledWords = shuffle([...words]);
+  shuffledWords.forEach(word => {
+    const btn = document.createElement('button');
+    btn.textContent = word;
+    btn.className = 'word-button';
+    btn.addEventListener('click', () => toggleSelection(btn, word));
+    puzzleGrid.appendChild(btn);
+  });
+}
+
+function toggleSelection(button, word) {
+  if (selectedWords.includes(word)) {
+    selectedWords = selectedWords.filter(w => w !== word);
+    button.classList.remove('selected');
+    message.textContent = '';
+    return;
+  }
+
+  if (selectedWords.length < 4) {
+    selectedWords.push(word);
+    button.classList.add('selected');
+  }
+
+  if (selectedWords.length === 4) {
+    checkSelection();
+  }
+}
+
+function checkSelection() {
+  let foundCategory = null;
+  for (const [category, group] of Object.entries(categories)) {
+    if (selectedWords.every(word => group.includes(word))) {
+      foundCategory = category;
+      break;
+    }
+  }
+
+  if (foundCategory) {
+    message.textContent = `Correct! The category is: ${foundCategory}`;
+    disableSelectedButtons();
+    selectedWords = [];
+  } else {
+    message.textContent = 'Incorrect group. Try again!';
+    clearSelection();
+  }
+}
+
+function disableSelectedButtons() {
+  const buttons = document.querySelectorAll('.word-button.selected');
+  buttons.forEach(btn => {
+    btn.disabled = true;
+    btn.classList.remove('selected');
+    btn.style.backgroundColor = '#999';
+    btn.style.cursor = 'default';
+  });
+}
+
+function clearSelection() {
+  const buttons = document.querySelectorAll('.word-button.selected');
+  buttons.forEach(btn => btn.classList.remove('selected'));
+  selectedWords = [];
+}
+
+resetBtn.addEventListener('click', () => {
+  clearSelection();
+  message.textContent = '';
+});
+
+createButtons();
+
+</script> </body> </html>
